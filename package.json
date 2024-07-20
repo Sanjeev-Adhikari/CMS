@@ -1,0 +1,16 @@
+{
+  "name": "cms",
+  "version": "1.0.0",
+  "description": "Content Management System",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "Sanjeev",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1",
+    "nodemon": "^3.1.4"
+  }
+}
