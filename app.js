@@ -1,23 +1,34 @@
+//database lai connect garnako lagi require gareko
 const { connectDatabase } = require("./database/database")
 const Blog = require("./model/blogmodel")
 const express = require("express")
 const app = express();
 
-//nodejs lai form bata ako data parse gar bhaneko
+const cors = require('cors');
 
+
+//Tell node to use DOTENV
+require("dotenv").config()
+
+
+//backend bata frontend lai data dina
+
+app.use(cors({
+    origin : 'http://localhost:5173',
+    
+}))
+
+//nodejs lai form bata ako data parse gar bhaneko
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+
 //Database connection
-
-connectDatabase()
-
-
+connectDatabase(process.env.MONGO_URI)
 
 //GET API
 app.get("/", (req,res)=>{
-    res.json({
-        status : 201,
-        message : "sucess"
+    res.status(201).json({
+        message : "success"
     })
 })
 
@@ -38,7 +49,7 @@ app.get("/blogs", async (req,res)=>{
         res.status(201).json ({
             // status : 201,
             message : "Blog fetched successfully ", 
-            data : blogs
+            blogs : blogs
         })
     }
 })
@@ -69,7 +80,7 @@ const blog = await Blog.findById(id)
 if(blog){
     res.status(201).json({
         message : "single blog found successfully",
-        data : blog
+        blog : blog
     })
 }else { 
     res.status(404).json({
@@ -78,6 +89,7 @@ if(blog){
 }
 
 })
+
 //POST API for creating the blog => (/createBlog)
 app.post("/createBlog", async (req,res)=>{
     const title = req.body.title;
@@ -93,8 +105,7 @@ app.post("/createBlog", async (req,res)=>{
         subTitle: subTitle,
        description : description,   
     })
-    res.json({
-        status : 201,
+    res.status(201).json({
         message : "Blog created successfully"
     })
 
@@ -104,7 +115,43 @@ app.post("/createBlog", async (req,res)=>{
    // })
 })
 
+//Patch API for updating/editing the blogs (Update blogs API)
+app.patch("/blogs/:id", async (req,res)=>{
+    const id = req.params.id
+    const title = req.body.title
+    const subTitle = req.body.subTitle
+    const description = req.body.description
+//alternative (object destructuring) const {title,subTitle.description} = req.body
+
+   await Blog.findByIdAndUpdate(id, {
+        title : title,
+        subTitle : subTitle,
+        description : description
+
+    })
+    res.status(201).json({
+        message : "blog updated successfully"
+    })
+})
+
+//Delete API for deleting the blogs (Delete Blog API)
+app.delete("/blogs/:id", async (req,res)=>{
+    const id = req.params.id
+    //alternative const {id} = req.parms
+
+    await Blog.findByIdAndDelete(id)
+
+    res.status(201).json({
+        message : "blog deleted successfully"
+    })
+})
+
+
+
+
 //Setting the port no for our express to run
-app.listen(2000,()=>{
+const PORT = process.env.PORT
+
+app.listen(PORT,()=>{
     console.log("Server is running at port 2000")
 })
